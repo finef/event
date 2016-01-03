@@ -8,7 +8,7 @@ class Event
     protected $_id;
     protected $_subject;
     protected $_val;
-    protected $_cancel = false;
+    protected $_propagationStopped = false;
 
     public function __construct(array $config = array())
     {
@@ -71,15 +71,15 @@ class Event
         return $this->_val;
     }
 
-    public function cancel($cancel = true)
+    public function stopPropagation()
     {
-        $this->_cancel = $cancel;
+        $this->_propagationStopped = true;
         return $this;
     }
 
-    public function isCanceled()
+    public function isPropagationStopped()
     {
-        return $this->_cancel;
+        return $this->_propagationStopped;
     }
 
 }

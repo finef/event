@@ -26,7 +26,7 @@ class Dispatcher
 
         foreach ($this->_listener[$id] as $listener) {
             call_user_func($listener['callback'], $event);
-            if ($event->isCanceled()) {
+            if ($event->isPropagationStopped()) {
                 break;
             }
         }
