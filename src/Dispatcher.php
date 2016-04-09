@@ -5,38 +5,49 @@ namespace \Fine\Event;
 class Dispatcher
 {
 
-    protected $_listener = array();
+    protected $_listeners = [];
 
-    public function on($id, $callback, $priority = 0)
+    public function on($id, $callback, $priority = 0, $filter = null)
     {
-        $listener = array('priority' => $priority, 'callback' => $callback);
+        $listener = (object)['priority' => $priority, 'callback' => $callback, 'filter' => $filter];
 
-        /* @TODO insert by priority */
-
-        $this->_listener[$eventId][] = $listener;
+        if (!$this->_listeners[$id]) {
+            $this->_listeners[$id] = [];
+        }
+        
+        $pos = count($this->_listeners[$id]);
+        foreach ($this->_listeners[$id] as $k => $v) {
+            if ($v->priority > $listener->priority) {
+                $pos = $k;
+                break;
+            }            
+        }
+        
+        array_splice($this->_listeners[$id], $pos, 0, [$listener]);
     }
 
     public function run(Event $event)
     {
         $id = $event->id();
 
-        if (!isset($this->_listener[$id])) {
+        if (!isset($this->_listeners[$id])) {
             return $this;
         }
 
-        foreach ($this->_listener[$id] as $listener) {
-            call_user_func($listener['callback'], $event);
+        foreach ($this->_listeners[$id] as $listener) {
+            
+            if ($listener->filter !== null && $listener->filter !== $event->getFilter()) {
+                continue;
+            }
+            
+            call_user_func($listener->callback, $event);
             if ($event->isPropagationStopped()) {
                 break;
             }
+            
         }
 
         return $this;
-    }
-
-    public function runId($id)
-    {
-        return $this->run((new Event())->setId($id));
     }
 
 }

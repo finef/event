@@ -9,6 +9,7 @@ class Event
     protected $_subject;
     protected $_val;
     protected $_propagationStopped = false;
+    protected $_filter;
 
     public function __construct(array $config = array())
     {
@@ -20,21 +21,17 @@ class Event
     public function __call($method, $args)
     {
         if (substr($method, 0, 3) == 'set') {
-
             $property = lcfirst(substr($method, 3));
             $this->$property = $args[0];
             return $this;
 
         } elseif (substr($method, 0, 3) == 'get') {
-
             $property = lcfirst(substr($method, 3));
             return $this->$property;
 
         } elseif (substr($method, 0, 2) == 'is') {
-
             $property = lcfirst(substr($method, 2));
             return isset($this->$property);
-
         }
     }
 
@@ -69,6 +66,17 @@ class Event
     public function getVal()
     {
         return $this->_val;
+    }
+    
+    public function setFilter($filter) 
+    {
+        $this->_filter = $filter;
+        return $this;
+    }
+
+    public function getFilter() 
+    {
+        return $this->_filter;
     }
 
     public function stopPropagation()
