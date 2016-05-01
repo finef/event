@@ -24,6 +24,8 @@ class Dispatcher
         }
         
         array_splice($this->_listeners[$id], $pos, 0, [$listener]);
+
+        return $this;
     }
 
     public function run(Event $event)
@@ -47,7 +49,7 @@ class Dispatcher
             
         }
 
-        return $this;
+        return $event;
     }
 
 }
