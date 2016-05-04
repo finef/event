@@ -1,6 +1,6 @@
 <?php
 
-namespace \Fine\Event;
+namespace Fine\Event;
 
 class Dispatcher
 {

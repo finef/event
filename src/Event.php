@@ -1,6 +1,6 @@
 <?php
 
-namespace \Fine\Event;
+namespace Fine\Event;
 
 class Event
 {
@@ -10,6 +10,7 @@ class Event
     protected $_val;
     protected $_propagationStopped = false;
     protected $_filter;
+    protected $_dispatcher;
 
     public function __construct(array $config = array())
     {
@@ -20,17 +21,17 @@ class Event
 
     public function __call($method, $args)
     {
-        if (substr($method, 0, 3) == 'set') {
-            $property = lcfirst(substr($method, 3));
+        $action = substr($method, 0, 3);
+        $property = lcfirst(substr($method, 3));
+
+        if ($action === 'set') {
             $this->$property = $args[0];
             return $this;
 
-        } elseif (substr($method, 0, 3) == 'get') {
-            $property = lcfirst(substr($method, 3));
+        } elseif ($action === 'get') {
             return $this->$property;
 
-        } elseif (substr($method, 0, 2) == 'is') {
-            $property = lcfirst(substr($method, 2));
+        } elseif ($action == 'has') {
             return isset($this->$property);
         }
     }
@@ -88,6 +89,17 @@ class Event
     public function isPropagationStopped()
     {
         return $this->_propagationStopped;
+    }
+
+    public function setDispatcher($dispatcher)
+    {
+        $this->_dispatcher = $dispatcher;
+        return $this;
+    }
+
+    public function run()
+    {
+        return $this->_dispatcher->run($this);
     }
 
 }
