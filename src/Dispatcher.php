@@ -2,7 +2,7 @@
 
 namespace Fine\Event;
 
-class Dispatcher
+class EventDispatcher
 {
 
     protected $_listeners = [];
