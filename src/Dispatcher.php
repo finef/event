@@ -2,51 +2,42 @@
 
 namespace Fine\Event;
 
-class EventDispatcher
+class Dispatcher
 {
 
     protected $_listeners = [];
 
-    public function on($id, $callback, $priority = 0, $filter = null)
+    public function bind(Listener $listener)
     {
-        $listener = (object)['priority' => $priority, 'callback' => $callback, 'filter' => $filter];
-
-        if (!$this->_listeners[$id]) {
-            $this->_listeners[$id] = [];
+        if (!$this->_listeners[$listener->getId()]) {
+            $this->_listeners[$listener->getId()] = [];
         }
         
-        $pos = count($this->_listeners[$id]);
-        foreach ($this->_listeners[$id] as $k => $v) {
-            if ($v->priority > $listener->priority) {
+        $pos = count($this->_listeners[$listener->getId()]);
+        foreach ($this->_listeners[$listener->getId()] as $k => $v) {
+            if ($v->priority > $listener->getPriority()) {
                 $pos = $k;
                 break;
             }            
         }
         
-        array_splice($this->_listeners[$id], $pos, 0, [$listener]);
+        array_splice($this->_listeners[$listener->getId()], $pos, 0, [$listener]);
 
         return $this;
+    }
+    
+    public function on($id, $callback, $priority = 0)
+    {
+        return $this->bind((new Listener())->setId($id)->setCallback($callback)->setPriority($priority));
     }
 
     public function run(Event $event)
     {
-        $id = $event->id();
-
-        if (!isset($this->_listeners[$id])) {
-            return $this;
-        }
-
-        foreach ($this->_listeners[$id] as $listener) {
-            
-            if ($listener->filter !== null && $listener->filter !== $event->getFilter()) {
-                continue;
-            }
-            
-            call_user_func($listener->callback, $event);
+        foreach ((array)$this->_listeners[$event->getId()] as $listener) {
+            call_user_func($listener->getCallback(), $event);
             if ($event->isPropagationStopped()) {
                 break;
             }
-            
         }
 
         return $event;
